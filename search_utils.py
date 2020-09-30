@@ -63,7 +63,7 @@ def expand_all(current_state: State, goal_state_brd: list, board_length: int, ex
             id += 1
 
     # Move down if we can
-    if empty_block < 15:
+    if empty_block < board_length - 3:
         swap_positions(down_board, empty_block, 3)
 
         if down_board not in expanded_boards:

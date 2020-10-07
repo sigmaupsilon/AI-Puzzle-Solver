@@ -1,5 +1,5 @@
 class State:
-    def __init__(self, id, pid, cbrd, gn, hn):
+    def __init__(self, id: str, pid: str, cbrd: list, gn: int, hn: int):
         self.id = id
         self.pid = pid
         self.cbrd = cbrd

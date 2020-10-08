@@ -1,13 +1,12 @@
-import sys
 from re import search
 from queue import PriorityQueue
 from state import State
 
 
-def parse_input() -> list:
+def parse_input(first_arg: str, second_arg: str) -> list:
     """Parse input arguments and return [start_state_brd, goal_state_brd, board_length (6x3 configuration)]"""
-    start_state_brd = search(r"\[([0-9,]+)]", sys.argv[1]).group(1).split(',')
-    goal_state_brd = search(r"\[([0-9,]+)]", sys.argv[2]).group(1).split(',')
+    start_state_brd = search(r"\[([0-9,]+)]", first_arg).group(1).split(',')
+    goal_state_brd = search(r"\[([0-9,]+)]", second_arg).group(1).split(',')
     return [start_state_brd, goal_state_brd, len(goal_state_brd)]
 
 
@@ -17,7 +16,8 @@ def swap_positions(list: list, empty_block: int, offset: int):
     list[empty_block], list[pos2] = list[pos2], list[empty_block]
 
 
-def expand_all(current_state: State, goal_state_brd: list, board_length: int, expanded_boards: list) -> list:
+def expand_all(current_state: State, goal_state_brd: list, board_length: int, expanded_boards: list, is_astar: bool,
+               h_type: int = 1) -> list:
     """Expand child states and return them"""
     # Initialize empty block and possible board movements
     empty_block = current_state.cbrd.index('0')
@@ -26,9 +26,11 @@ def expand_all(current_state: State, goal_state_brd: list, board_length: int, ex
     up_board = current_state.cbrd.copy()
     down_board = current_state.cbrd.copy()
 
-    # Initialize current level and ID for specific state for level
+    # Initialize current level, ID for specific state for level, hn, and gn
     current_level = get_level(current_state) + 1
     id = 0
+    hn = 0
+    gn = 0
 
     # Initialize empty list of all expansion possibilities
     expansions = []
@@ -39,8 +41,9 @@ def expand_all(current_state: State, goal_state_brd: list, board_length: int, ex
         swap_positions(left_board, empty_block, swap_index)
 
         if left_board not in expanded_boards:
-            hn = get_hn(left_board, goal_state_brd, board_length)
-            gn = get_gn(current_state, empty_block, swap_index)
+            if is_astar:
+                hn = get_hn(left_board, goal_state_brd, board_length, h_type)
+                gn = get_gn(current_state, empty_block, swap_index)
             left_state = State(str(current_level) + '_' + str(id), current_state.id, left_board, gn, hn)
             expansions.append((left_state, "Left"))
             id += 1
@@ -51,8 +54,9 @@ def expand_all(current_state: State, goal_state_brd: list, board_length: int, ex
         swap_positions(up_board, empty_block, swap_index)
 
         if up_board not in expanded_boards:
-            hn = get_hn(up_board, goal_state_brd, board_length)
-            gn = get_gn(current_state, empty_block, swap_index)
+            if is_astar:
+                hn = get_hn(up_board, goal_state_brd, board_length, h_type)
+                gn = get_gn(current_state, empty_block, swap_index)
             up_state = State(str(current_level) + '_' + str(id), current_state.id, up_board, gn, hn)
             expansions.append((up_state, "Up"))
             id += 1
@@ -63,8 +67,9 @@ def expand_all(current_state: State, goal_state_brd: list, board_length: int, ex
         swap_positions(right_board, empty_block, swap_index)
 
         if right_board not in expanded_boards:
-            hn = get_hn(right_board, goal_state_brd, board_length)
-            gn = get_gn(current_state, empty_block, swap_index)
+            if is_astar:
+                hn = get_hn(right_board, goal_state_brd, board_length, h_type)
+                gn = get_gn(current_state, empty_block, swap_index)
             right_state = State(str(current_level) + '_' + str(id), current_state.id, right_board, gn, hn)
             expansions.append((right_state, "Right"))
             id += 1
@@ -75,23 +80,34 @@ def expand_all(current_state: State, goal_state_brd: list, board_length: int, ex
         swap_positions(down_board, empty_block, swap_index)
 
         if down_board not in expanded_boards:
-            hn = get_hn(down_board, goal_state_brd, board_length)
-            gn = get_gn(current_state, empty_block, swap_index)
+            if is_astar:
+                hn = get_hn(down_board, goal_state_brd, board_length, h_type)
+                gn = get_gn(current_state, empty_block, swap_index)
             down_state = State(str(current_level) + '_' + str(id), current_state.id, down_board, gn, hn)
             expansions.append((down_state, "Down"))
 
     return expansions
 
 
-def get_hn(target_state_brd: list, goal_state_brd: list, board_length: int) -> int:
+def get_hn(target_state_brd: list, goal_state_brd: list, board_length: int, h_type: int) -> int:
     """Get h1(n) (equal to number of mismatches)"""
-    count = 0
+    heuristic = 0
 
     for i in range(board_length):
         if target_state_brd[i] != goal_state_brd[i]:
-            count += 1
+            if h_type == 1:
+                heuristic += 1
+            else:
+                goal_offset = abs(i - goal_state_brd.index(target_state_brd[i]))
+                while goal_offset % 3 != 0:
+                    heuristic += 1
+                    goal_offset -= 1
 
-    return count
+                while goal_offset > 1:
+                    heuristic += 1
+                    goal_offset /= 3
+
+    return heuristic
 
 
 def get_gn(current_state: State, empty_block: int, offset: int) -> int:

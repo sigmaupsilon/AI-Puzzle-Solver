@@ -1,3 +1,4 @@
+import sys
 import search_utils
 from copy import deepcopy
 from queue import PriorityQueue
@@ -14,7 +15,7 @@ def bfs(open_list: PriorityQueue, closed_list: list, expand_state: State, goal_s
         return False
 
     # Get expanded children state
-    expansions = search_utils.expand_all(expand_state, goal_state_brd, board_length, expanded_boards)
+    expansions = search_utils.expand_all(expand_state, goal_state_brd, board_length, expanded_boards, False)
 
     # Add expansions to open list
     for i in range(len(expansions)):
@@ -39,7 +40,7 @@ def bfs(open_list: PriorityQueue, closed_list: list, expand_state: State, goal_s
 
 if __name__ == "__main__":
     # Retrieve boards and length
-    input_lists = search_utils.parse_input()
+    input_lists = search_utils.parse_input(sys.argv[1], sys.argv[2])
     start_state_brd, goal_state_brd, board_length = input_lists[0], input_lists[1], input_lists[2]
 
     # Initialize empty closed list and list which will keep track of all boards that go in open list

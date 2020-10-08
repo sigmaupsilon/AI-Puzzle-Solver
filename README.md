@@ -5,12 +5,14 @@ CS 4033 (001) Homework
 * Python 3.8
 
 ## How to Run
-Each vector should be formatted as such [1,2,0,...] where 0 represents the empty state. Only a 3-column grid is
-supported at the moment for BFS. A* only supports 6x3 grid. There must **NO** spaces within the brackets of the vector.
+* Each vector should be formatted as such [1,2,0,...] where 0 represents the empty state. There must **NO** spaces
+within the brackets of the vector.
+* BFS only supports a 3-column grid at the moment. A* only supports a 6x3 grid.
 
 ### Command
     python {search to run} {input vector} {output vector}
 
 ## Supported Searches
 * BFS (Breadth-First Search) - **bfs.py**
-* A* (A* Search) - **a_star.py**
+* A* Search (Heuristic = # of mismatches between start and goal state) - **a_star_firsth.py**
+* A* Search (Heuristic = sum of smallest # of moves needed for each mismatch to be fixed) - **a_star_secondh.py**

@@ -4,8 +4,8 @@ from queue import PriorityQueue
 from state import State
 
 
-def a_star(open_list: PriorityQueue, closed_list: list, current_state: State, board_length: int,
-           expanded_boards: list) -> bool:
+def a_star(open_list: PriorityQueue, closed_list: list, current_state: State, goal_state_brd: list, board_length: int,
+           expanded_boards: list, h_type: int) -> bool:
     """A* Search. Return boolean depending on whether or not goal state is found"""
     # Retrieve current level. Return false 36+ levels are explored
     level = search_utils.get_level(current_state)
@@ -17,7 +17,7 @@ def a_star(open_list: PriorityQueue, closed_list: list, current_state: State, bo
     search_utils.add_open_list_to_expanded(open_list, expanded_boards, 3)
 
     # Get expanded children state and add highest priority state in open list to closed list
-    expansions = search_utils.expand_all(current_state, goal_state_brd, board_length, expanded_boards)
+    expansions = search_utils.expand_all(current_state, goal_state_brd, board_length, expanded_boards, True, h_type)
     closed_list.append(open_list.get()[3])
 
     # Add expansions to open list
@@ -32,12 +32,13 @@ def a_star(open_list: PriorityQueue, closed_list: list, current_state: State, bo
     # Update current state and level
     current_state = open_list.queue[0][3][0]
 
-    return a_star(open_list, closed_list, current_state, board_length, expanded_boards)
+    return a_star(open_list, closed_list, current_state, goal_state_brd, board_length, expanded_boards, h_type)
 
 
-if __name__ == "__main__":
+def a_star_wrapper(h_type: int, first_arg: str, second_arg: str):
+    """A* Search Wrapper"""
     # Retrieve boards and length
-    input_lists = search_utils.parse_input()
+    input_lists = search_utils.parse_input(first_arg, second_arg)
     start_state_brd, goal_state_brd, board_length = input_lists[0], input_lists[1], input_lists[2]
 
     # Initialize empty closed list and list which will keep track of all boards that go in open list
@@ -47,10 +48,9 @@ if __name__ == "__main__":
     # Make sure the start state isn't already the goal state
     if start_state_brd != goal_state_brd:
         # Run initial heuristic and initialize start state. State ID is formatted as {level}_{level ID value}.
-        # In a_star, f(n) = h(n) + g(n)
-        h = search_utils.get_hn(start_state_brd, goal_state_brd, board_length)
+        # In A*, f(n) = h(n) + g(n)
+        h = search_utils.get_hn(start_state_brd, goal_state_brd, board_length, h_type)
         current_state = State("0_0", "", start_state_brd, 0, h)
-        level = search_utils.get_level(current_state)
 
         # Initialize open list
         open_list = PriorityQueue()
@@ -60,7 +60,7 @@ if __name__ == "__main__":
                        search_utils.get_id_on_level(current_state), deepcopy((current_state, "Start"))))
 
         # Run A* and Print results
-        if a_star(open_list, closed_list, current_state, board_length, expanded_boards):
+        if a_star(open_list, closed_list, current_state, goal_state_brd, board_length, expanded_boards, h_type):
             print("Goal state found!\n")
         else:
             print("No solution found! Quit after 36 levels.\n")

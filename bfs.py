@@ -4,25 +4,6 @@ from queue import PriorityQueue
 from state import State
 
 
-def add_open_list_to_expanded(open_list: PriorityQueue, expanded_boards: list):
-    """Add all boards in open list to another list"""
-    for i in range(len(open_list.queue)):
-        if open_list.queue[i][2][0].cbrd not in expanded_boards:
-            expanded_boards.append(open_list.queue[i][2][0].cbrd)
-
-
-def print_state_detailed_output(closed_list: list, index: int):
-    """Print state details"""
-    if index == 0:
-        print("\t\tRoot")
-    elif index > 0 and closed_list[index][0].pid != closed_list[index - 1][0].pid:
-        print("\t\tParent State ID: " + closed_list[index][0].pid)
-
-    print("\t\t\tState ID: " + closed_list[index][0].id)
-    print("\t\t\tBoard Config and Relative Movement to Parent: " + "[" +
-          ', '.join(closed_list[index][0].cbrd) + "] - " + closed_list[index][1] + "\n")
-
-
 def bfs(open_list: PriorityQueue, closed_list: list, expand_state: State, goal_state_brd: list, board_length: int,
         expanded_boards: list) -> bool:
     """BFS search. Return True if goal was found and False on timeout"""
@@ -37,11 +18,11 @@ def bfs(open_list: PriorityQueue, closed_list: list, expand_state: State, goal_s
 
     # Add expansions to open list
     for i in range(len(expansions)):
-        open_list.put((level, search_utils.get_id_on_level(expansions[i][0]),
+        open_list.put((level + 1, search_utils.get_id_on_level(expansions[i][0]),
                        deepcopy(expansions[i])))
 
     # Add boards of open list to expanded boards
-    add_open_list_to_expanded(open_list, expanded_boards)
+    search_utils.add_open_list_to_expanded(open_list, expanded_boards, 2)
 
     # Check if state boards equal goal board and add analyzed states to closed list
     for i in range(len(open_list.queue)):
@@ -69,7 +50,7 @@ if __name__ == "__main__":
     if start_state_brd != goal_state_brd:
         # Initialize start state. State ID is formatted as {level}_{level ID value}.
         # Initialize open list and boolean for if goal state is found
-        expand_state = State('0_0', None, start_state_brd, 0, 0)
+        expand_state = State("0_0", "", start_state_brd, 0, 0)
         open_list = PriorityQueue()
 
         # Put start state on open list
@@ -82,12 +63,6 @@ if __name__ == "__main__":
         else:
             print("No solution found! Quit after 36 levels.\n")
 
-        print("Path-")
-        for i in range(len(closed_list)):
-            search_utils.print_level(closed_list, i)
-            print_state_detailed_output(closed_list, i)
-
-        print("\nNumber of nodes added to each list-" + " Open list: " + str(len(expanded_boards)) + ", Closed list: " +
-              str(len(closed_list)))
+        search_utils.print_output(closed_list, expanded_boards, False)
     else:
         print("Start state and Goal state inputs are equivalent!")

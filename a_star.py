@@ -4,11 +4,35 @@ from queue import PriorityQueue
 from state import State
 
 
-def add_open_list_to_expanded(open_list: PriorityQueue, expanded_boards: list):
-    """Add all boards in open list to another list"""
-    for i in range(len(open_list.queue)):
-        if open_list.queue[i][1][0].cbrd not in expanded_boards:
-            expanded_boards.append(open_list.queue[i][1][0].cbrd)
+def a_star(open_list: PriorityQueue, closed_list: list, current_state: State, board_length: int,
+           expanded_boards: list) -> bool:
+    """A* Search. Return boolean depending on whether or not goal state is found"""
+    # Retrieve current level. Return false 36+ levels are explored
+    level = search_utils.get_level(current_state)
+
+    if level > 35:
+        return False
+
+    # Add boards of open list to expanded boards
+    search_utils.add_open_list_to_expanded(open_list, expanded_boards, 3)
+
+    # Get expanded children state and add highest priority state in open list to closed list
+    expansions = search_utils.expand_all(current_state, goal_state_brd, board_length, expanded_boards)
+    closed_list.append(open_list.get()[3])
+
+    # Add expansions to open list
+    for i in range(len(expansions)):
+        open_list.put((expansions[i][0].fn, search_utils.get_level(expansions[i][0]),
+                       search_utils.get_id_on_level(expansions[i][0]), deepcopy(expansions[i])))
+
+    # Return True if goal state is found
+    if closed_list[-1][0].cbrd == goal_state_brd:
+        return True
+
+    # Update current state and level
+    current_state = open_list.queue[0][3][0]
+
+    return a_star(open_list, closed_list, current_state, board_length, expanded_boards)
 
 
 if __name__ == "__main__":
@@ -23,49 +47,24 @@ if __name__ == "__main__":
     # Make sure the start state isn't already the goal state
     if start_state_brd != goal_state_brd:
         # Run initial heuristic and initialize start state. State ID is formatted as {level}_{level ID value}.
-        # In BFSIS, f(n) = h(n)
+        # In a_star, f(n) = h(n) + g(n)
         h = search_utils.get_hn(start_state_brd, goal_state_brd, board_length)
-        current_state = State('0_0', None, start_state_brd, 0, h)
+        current_state = State("0_0", "", start_state_brd, 0, h)
         level = search_utils.get_level(current_state)
 
         # Initialize open list
         open_list = PriorityQueue()
 
         # Put start state on open list and begin search. Quit if goal state is reached or 36+ levels are explored
-        open_list.put((current_state.hn, deepcopy((current_state, "Start"))))
-        while current_state.cbrd != goal_state_brd and level < 36:
-            # Add boards of open list to expanded boards
-            add_open_list_to_expanded(open_list, expanded_boards)
+        open_list.put((current_state.fn, search_utils.get_level(current_state),
+                       search_utils.get_id_on_level(current_state), deepcopy((current_state, "Start"))))
 
-            # Get expanded children state and add highest priority state in open list to closed list
-            expansions = search_utils.expand_all(current_state, goal_state_brd, board_length, expanded_boards)
-            closed_list.append(open_list.get()[1])
-
-            # Add expansions to open list
-            for i in range(len(expansions)):
-                open_list.put((expansions[i][0].fn, deepcopy(expansions[i])))
-
-            # Update current state and level
-            current_state = open_list.queue[0][1][0]
-            level = search_utils.get_level(current_state)
-
-        # Add final highest-priority open list state to closed list
-        closed_list.append(open_list.get()[1])
-
-        # Print results
-        if closed_list[-1][0].cbrd == goal_state_brd:
+        # Run A* and Print results
+        if a_star(open_list, closed_list, current_state, board_length, expanded_boards):
             print("Goal state found!\n")
         else:
             print("No solution found! Quit after 36 levels.\n")
 
-        print("Path-")
-        for i in range(len(closed_list)):
-            print(
-                "\tState ID: " + closed_list[i][0].id + ", Level: " + str(
-                    search_utils.get_level(closed_list[i][0])) + ", Board Config and Movement: " + "[" +
-                ', '.join(closed_list[i][0].cbrd) + "] - " + closed_list[i][1] + ", f(n): " + str(closed_list[i][0].fn))
-
-        print("\nNumber of nodes added to open list: " + str(len(expanded_boards)) + " and closed list: " + str(
-            len(closed_list)))
+        search_utils.print_output(closed_list, expanded_boards, True)
     else:
         print("Start state and Goal state inputs are equivalent!")

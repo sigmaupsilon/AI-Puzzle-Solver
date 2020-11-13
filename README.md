@@ -1,10 +1,11 @@
 # AI Assignments 
 CS 4033 (001) Homework
 
-## Requirements
+## Puzzle Solver
+
+### Requirements
 * Python 3.8
 
-## Puzzle Solver
 ### How to Run
 * Each vector should be formatted as such [1,2,0,...] where 0 represents the empty state. There must **NO** spaces
 within the brackets of the vector.
@@ -19,6 +20,10 @@ within the brackets of the vector.
 * A* Search (Heuristic = sum of smallest # of moves needed for each mismatch to be fixed) - **a_star_secondh.py**
 
 ## Cryptarithmetic CSP
+
+### Requirements
+* Python 3.8
+
 ### How to Run
 Constraint support for 3 problems:
 
@@ -29,4 +34,13 @@ Constraint support for 3 problems:
 </ol>
 
 #### Command
-    python {a|b|c}
+    python main.py {a|b|c}
+
+## Decision Trees
+
+### Requirements
+* Python 3.7
+* Excel data with "X", "Y", and "Class" columns in same directory as script
+
+### How to Run
+    python main.py

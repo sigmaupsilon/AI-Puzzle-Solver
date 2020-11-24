@@ -1,10 +1,11 @@
 # AI Assignments 
 CS 4033 (001) Homework
 
-## Puzzle Solver
-
-### Requirements
+## Requirements
 * Python 3.8
+* Excel data with "X", "Y", and "Class" columns in same directory as script for *Decision Tree* and *Neural Networks*
+
+## Puzzle Solver
 
 ### How to Run
 * Each vector should be formatted as such [1,2,0,...] where 0 represents the empty state. There must **NO** spaces
@@ -21,9 +22,6 @@ within the brackets of the vector.
 
 ## Cryptarithmetic CSP
 
-### Requirements
-* Python 3.8
-
 ### How to Run
 Constraint support for 3 problems:
 
@@ -38,9 +36,10 @@ Constraint support for 3 problems:
 
 ## Decision Trees
 
-### Requirements
-* Python 3.7
-* Excel data with "X", "Y", and "Class" columns in same directory as script
+### How to Run
+    python main.py
+
+## Neural Networks
 
 ### How to Run
     python main.py

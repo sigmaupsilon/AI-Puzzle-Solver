@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 
 
-def run_nn_model(hidden_layers_sizes: int, x_train, x_test, y_train, y_test):
+def run_nn_model(hidden_layers_sizes: tuple, x_train, x_test, y_train, y_test):
     print("Single-layer model ran using " + str(hidden_layers_sizes) + " neurons")
 
     # Create grid of X Y coordinate values
@@ -34,11 +34,12 @@ def run_nn_model(hidden_layers_sizes: int, x_train, x_test, y_train, y_test):
     grid_pred = mlp.predict(grid)
 
     # Count mismatches and build colormap for points
+    y_train_list = list(y_train)
     cmapped_points = [0, np.empty(0)]
     for i in range(x_train.shape[0]):
         mismatch = False
 
-        if class_val[i] != train_pred[i]:
+        if y_train_list[i] != train_pred[i]:
             cmapped_points[0] += 1
             mismatch = True
 
@@ -99,5 +100,5 @@ if __name__ == "__main__":
     # Create training and test data
     x_train, x_test, y_train, y_test = train_test_split(coord, class_val, test_size=0.30)
 
-    run_nn_model(2, x_train, x_test, y_train, y_test)
-    run_nn_model(6, x_train, x_test, y_train, y_test)
+    run_nn_model((2,), x_train, x_test, y_train, y_test)
+    run_nn_model((6,), x_train, x_test, y_train, y_test)
